@@ -30,7 +30,6 @@ public class StatementPrinter {
      * @throws RuntimeException if one of the play types is not known
      */
     public String statement() {
-
         // result loop
         final StringBuilder result = new StringBuilder("Statement for " + invoice.getCustomer()
                 + System.lineSeparator());
@@ -39,7 +38,7 @@ public class StatementPrinter {
             final int rslt = getAmount(p);
             // print line for this order
             result.append(String.format("  %s: %s (%s seats)%n", getPlay(p).getName(),
-                    getFormat(rslt), p.getAudience()));
+                    usd(rslt), p.getAudience()));
         }
 
         getAppend(result, getTotalAmount());
@@ -60,14 +59,13 @@ public class StatementPrinter {
     private int getTotalVolumeCredits() {
         int result = 0;
         for (Performance p : invoice.getPerformances()) {
-            final int volumeCredit = 0;
 
-            result += getVolumeCredits(p, volumeCredit);
+            result += getVolumeCredits(p);
         }
         return result;
     }
 
-    private static String getFormat(int rslt) {
+    private static String usd(int rslt) {
         return NumberFormat.getCurrencyInstance(Locale.US).format(rslt / Constants.PERCENT_FACTOR);
     }
 
@@ -76,8 +74,9 @@ public class StatementPrinter {
                 NumberFormat.getCurrencyInstance(Locale.US).format(totalAmount / Constants.PERCENT_FACTOR)));
     }
 
-    private int getVolumeCredits(Performance performance, int result) {
+    private int getVolumeCredits(Performance performance) {
         // add volume credits
+        int result = 0;
         result += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
         // add extra credit for every five comedy attendees
         if ("comedy".equals(getPlay(performance).getType())) {
